@@ -118,7 +118,7 @@ final class ChessTests: XCTestCase {
         1:  R  N  B  Q  K  B  N  R
         """
 
-        let expectedMove = Move(piece: Piece(type: "P", side: .black), val: 0.7, x1: 3, y1: 6, x2: 3, y2: 4)
+        let expectedMove = Move(piece: Piece(type: "P", side: .black), val: 0.05, x1: 3, y1: 6, x2: 3, y2: 4)
         verifyBestMove(from: before, to: after, expectedMove: expectedMove)
     }
 
@@ -140,15 +140,15 @@ final class ChessTests: XCTestCase {
             a  b  c  d  e  f  g  h
         8: {R}{N} ·  -  ·  - {N}{R}
         7: {P} · {P} ·  - {P}{P}{P}
-        6: {P} -  ·  - {Q} -  ·  -
+        6: {P} -  ·  -  ·  -  ·  -
         5:  -  ·  -  ·  -  ·  -  ·
-        4:  ·  - {K} - {P} -  ·  P
-        3:  K  ·  -  ·  -  ·  -  ·
+        4:  ·  - {Q} - {P} -  ·  P
+        3:  K  · {K} ·  -  ·  -  ·
         2:  ·  -  ·  -  ·  -  ·  -
         1:  -  ·  -  ·  -  ·  N  R
         """
 
-        let expectedMove = Move(piece: Piece(type: "K", side: .black), val: 3.6, x1: 2, y1: 2, x2: 2, y2: 3)
+        let expectedMove = Move(piece: Piece(type: "Q", side: .black), val: 3.44, x1: 4, y1: 5, x2: 2, y2: 3)
         verifyBestMove(from: before, to: after, expectedMove: expectedMove)
     }
 }

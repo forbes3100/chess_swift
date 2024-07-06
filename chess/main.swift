@@ -6,9 +6,6 @@
 
 import Foundation
 
-let debug = false
-let maxPlies = 4
-
 extension String {
     subscript(i: Int) -> Character {
         return self[index(startIndex, offsetBy: i)]
@@ -87,6 +84,9 @@ struct Move: CustomStringConvertible {
 
 // A state of the chess board.
 struct Board: CustomStringConvertible {
+    static let debug = false
+    static let maxPlies = 4
+
     var pos = [Piece](repeating: Piece(), count: 64)
     var side: Side
     var ply: Int
@@ -228,7 +228,7 @@ struct Board: CustomStringConvertible {
                     } else {  // standard piece: try all legal moves for it
                         findBestMoveLinearly()
                     }
-                    if debug {
+                    if Board.debug {
                         let indent = String(repeating: ".", count: ply)
                         print("\(indent)=> \(bestMove)")
                     }
@@ -273,7 +273,7 @@ struct Board: CustomStringConvertible {
             return false
         }
         var move = Move(piece: piece, x1: x1, y1: y1, x2: x2, y2: y2)
-        if debug {
+        if Board.debug {
             let indent = String(repeating: ".", count: ply)
             print("\(indent)\(move.description)")
         }
@@ -292,7 +292,7 @@ struct Board: CustomStringConvertible {
         }
 
         // best move for each ply will be put here
-        var newBestMoves = [Move](repeating: Move(), count: maxPlies)
+        var newBestMoves = [Move](repeating: Move(), count: Board.maxPlies)
 
         // if not at deepest ply level:
         if ply < nPlies {
@@ -322,7 +322,7 @@ struct Board: CustomStringConvertible {
             if ply < nPlies {
                 bestMoves = newBestMoves
                 bestMoves[ply] = move
-                if debug {
+                if Board.debug {
                     print("ply=\(ply)")
                     for m in bestMoves {
                         print(m.description, terminator: "; ")
