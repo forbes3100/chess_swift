@@ -19,6 +19,11 @@ enum ChessError: Error {
     case parse(String)
 }
 
+enum Side: Int {
+    case black = 0
+    case white = 1
+}
+
 // Get String representation of a board position.
 func posRepr(_ x: Int, _ y: Int) -> String {
     return "\("abcdefgh"[x])\(y + 1)"
@@ -27,17 +32,17 @@ func posRepr(_ x: Int, _ y: Int) -> String {
 // A chess piece.
 struct Piece: CustomStringConvertible {
     var type: Character
-    var side: Int
+    var side: Side
     var hasMoved: Bool
 
-    init(type: Character = ".", side: Int = -1) {
+    init(type: Character = ".", side: Side = .black) {
         self.type = type
         self.side = side
         hasMoved = false
     }
 
     var description: String {
-        if side == 1 {
+        if side == .white {
             return " \(type) "
         } else {
             return "{\(type)}"
@@ -83,7 +88,7 @@ struct Move: CustomStringConvertible {
 // A state of the chess board.
 struct Board: CustomStringConvertible {
     var pos = [Piece](repeating: Piece(), count: 64)
-    var side: Int
+    var side: Side
     var ply: Int
     var piece: Piece
     var bestMove: Move
@@ -107,15 +112,15 @@ struct Board: CustomStringConvertible {
 
     static let legalTypes: String = "PBNRQK"
 
-    init(side: Int = 0, ply: Int = 0, piece: Piece = Piece(), bestMove: Move = Move(),
+    init(side: Side = .black, ply: Int = 0, piece: Piece = Piece(), bestMove: Move = Move(),
          x1: Int = 0, y1: Int = 0, nPlies: Int = maxPlies) {
         let backRow = "RNBQKBNR"
         for i in 0..<8 {
             let backType = backRow[i]
-            pos[i] = Piece(type: backType, side: 1)
-            pos[8 + i] = Piece(type: "P", side: 1)
-            pos[6*8 + i] = Piece(type: "P", side: 0)
-            pos[7*8 + i] = Piece(type: backType, side: 0)
+            pos[i] = Piece(type: backType, side: .white)
+            pos[8 + i] = Piece(type: "P", side: .white)
+            pos[6*8 + i] = Piece(type: "P", side: .black)
+            pos[7*8 + i] = Piece(type: backType, side: .black)
         }
         self.side = side
         self.ply = ply
@@ -164,14 +169,14 @@ struct Board: CustomStringConvertible {
                     if s == "." || s == "·" || s == "-" {
                         pos[y * 8 + x].type = "."
                     } else {
-                        let side = s[0] == "{" ? 0 : 1
-                        let type = side == 0 ? s[1] : s[0]
+                        let side: Side = s[0] == "{" ? .black : .white
+                        let type = side == .black ? s[1] : s[0]
                         if !Board.legalTypes.contains(type) {
                             throw ChessError.parse("bad piece '\(type)'")
                         }
                         var piece = Piece(type: type, side: side)
                         if type == "P" {
-                            if (side == 0 && y != 6) || (side == 1 && y != 1) {
+                            if (side == .black && y != 6) || (side == .white && y != 1) {
                                 piece.hasMoved = true
                             }
                         }
@@ -196,7 +201,7 @@ struct Board: CustomStringConvertible {
 
         // set up search for our turn
         ply = b.ply + 1
-        side = 1 - b.side
+        side = Side(rawValue: 1 - b.side.rawValue)!
         bestMove = Move(val: -9999)
 
         // for each of X's pieces on board
@@ -212,7 +217,7 @@ struct Board: CustomStringConvertible {
                     let pType = piece.type
 
                     if pType == "P" {  // pawn
-                        let adv = piece.side == 1 ? 1 : -1
+                        let adv = piece.side == .white ? 1 : -1
                         if checkMove(x2: x1, y2: y1 + adv) && !piece.hasMoved {
                             _ = checkMove(x2: x1, y2: y1 + 2*adv)
                         }
@@ -286,7 +291,8 @@ struct Board: CustomStringConvertible {
             return false
         }
 
-        var bestMovess2 = [Move](repeating: Move(), count: maxPlies)
+        // best move for each ply will be put here
+        var newBestMoves = [Move](repeating: Move(), count: maxPlies)
 
         // if not at deepest ply level:
         if ply < nPlies {
@@ -300,7 +306,7 @@ struct Board: CustomStringConvertible {
 
             // subtract that move value from our value, with a future discount
             move.val -= 0.9 * board2.bestMove.val
-            bestMovess2 = board2.bestMoves
+            newBestMoves = board2.bestMoves
 
             // remove our piece from this position
             pos[y2 * 8 + x2] = piece2
@@ -314,7 +320,7 @@ struct Board: CustomStringConvertible {
         if move.val > bestMove.val {
             bestMove = move
             if ply < nPlies {
-                bestMoves = bestMovess2
+                bestMoves = newBestMoves
                 bestMoves[ply] = move
                 if debug {
                     print("ply=\(ply)")
@@ -361,7 +367,7 @@ func getHumanMove(board: Board, testMode: Bool) -> Move? {
             let y2 = Int(String(result.4))! - 1
 
             let hPiece = board.pos[y1 * 8 + x1]
-            if hPiece.type != "." && hPiece.side == 1 {
+            if hPiece.type != "." && hPiece.side == .white {
                 return Move(x1: x1, y1: y1, x2: x2, y2: y2)
             } else {
                 print("Not your piece at \(posRepr(x1, y1))")
