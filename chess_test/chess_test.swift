@@ -31,12 +31,12 @@ final class ChessTests: XCTestCase {
 
         for i in 8..<16 {
             XCTAssertEqual(board.pos[i].type, "P")
-            XCTAssertEqual(board.pos[i].side, 1)
+            XCTAssertEqual(board.pos[i].side, .white)
         }
 
         for i in 48..<56 {
             XCTAssertEqual(board.pos[i].type, "P")
-            XCTAssertEqual(board.pos[i].side, 0)
+            XCTAssertEqual(board.pos[i].side, .black)
         }
 
         XCTAssertEqual(board.pos[56].type, "R")
@@ -118,7 +118,7 @@ final class ChessTests: XCTestCase {
         1:  R  N  B  Q  K  B  N  R
         """
 
-        let expectedMove = Move(piece: Piece(type: "P", side: 0), val: 0.7, x1: 3, y1: 6, x2: 3, y2: 4)
+        let expectedMove = Move(piece: Piece(type: "P", side: .black), val: 0.7, x1: 3, y1: 6, x2: 3, y2: 4)
         verifyBestMove(from: before, to: after, expectedMove: expectedMove)
     }
 
@@ -148,7 +148,7 @@ final class ChessTests: XCTestCase {
         1:  -  ·  -  ·  -  ·  N  R
         """
 
-        let expectedMove = Move(piece: Piece(type: "K", side: 0), val: 3.6, x1: 2, y1: 2, x2: 2, y2: 3)
+        let expectedMove = Move(piece: Piece(type: "K", side: .black), val: 3.6, x1: 2, y1: 2, x2: 2, y2: 3)
         verifyBestMove(from: before, to: after, expectedMove: expectedMove)
     }
 }
