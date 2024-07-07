@@ -8,6 +8,38 @@
 import XCTest
 @testable import chess
 
+func captureStandardOutput(_ closure: @escaping () -> Void) -> String {
+    let outPipe = Pipe()
+    var outString = ""
+    let sema = DispatchSemaphore(value: 0)
+
+    outPipe.fileHandleForReading.readabilityHandler = { fileHandle in
+        let data = fileHandle.availableData
+        if data.isEmpty { // end-of-file condition
+            fileHandle.readabilityHandler = nil
+            sema.signal()
+        } else {
+            outString += String(data: data, encoding: .utf8) ?? ""
+        }
+    }
+
+    // Redirect stdout to the pipe
+    setvbuf(stdout, nil, _IONBF, 0)
+    let savedStdout = dup(STDOUT_FILENO)
+    dup2(outPipe.fileHandleForWriting.fileDescriptor, STDOUT_FILENO)
+
+    // Execute the closure
+    closure()
+
+    // Restore stdout and close the pipe
+    dup2(savedStdout, STDOUT_FILENO)
+    try! outPipe.fileHandleForWriting.close()
+    close(savedStdout)
+    sema.wait() // Wait until the read handler is done
+
+    return outString
+}
+
 final class ChessTests: XCTestCase {
 
     override func setUpWithError() throws {
@@ -150,5 +182,26 @@ final class ChessTests: XCTestCase {
 
         let expectedMove = Move(piece: Piece(type: "Q", side: .black), val: 3.44, x1: 4, y1: 5, x2: 2, y2: 3)
         verifyBestMove(from: before, to: after, expectedMove: expectedMove)
+    }
+
+    func testMainWithArguments() {
+        let originalArguments = CommandLine.arguments
+
+        CommandLine.arguments = ["chess", "-t"]
+        let output = captureStandardOutput {
+            main()
+        }
+        print(output)
+
+        XCTAssertTrue(output.contains("Your move: a2 a4"),
+                      "Output should contain human's move.")
+        XCTAssertTrue(output.contains("best move: {P} d7 d5 0.05;  P  d2 d4 0.73; {P} e7 e6 -0.03;"),
+                      "Output should contain best moves.")
+        XCTAssertTrue(output.contains("5:  -  ·  - {P} -  ·  -  · "),
+                      "Output should contain diagram of computer's move.")
+        XCTAssertTrue(output.contains("4:  P  -  ·  -  ·  -  ·  - "),
+                      "Output should contain diagram of human's move.")
+
+        CommandLine.arguments = originalArguments
     }
 }
