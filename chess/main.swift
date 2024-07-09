@@ -17,8 +17,8 @@ enum ChessError: Error {
 }
 
 // Get String representation of a board position.
-func posRepr(_ x: Int, _ y: Int) -> String {
-    return "\("abcdefgh"[x])\(y + 1)"
+func posRepr(_ i: Int) -> String {
+    return "\("abcdefgh"[i % 8])\((i / 8) + 1)"
 }
 
 // A chess piece.
@@ -42,35 +42,31 @@ struct Piece: CustomStringConvertible {
     }
 }
 
-// A chess move of a piece, from (x1, y1) to (x2, y2).
+// A chess move of a piece, from i1 to i2.
 struct Move: CustomStringConvertible {
     var piece: Piece?
     var val: Double
-    var x1: Int
-    var y1: Int
-    var x2: Int
-    var y2: Int
+    var i1: Int
+    var i2: Int
 
-    init(piece: Piece? = nil, val: Double = 0.0, x1: Int = 0, y1: Int = 0, x2: Int = 0, y2: Int = 0) {
+    init(piece: Piece? = nil, val: Double = 0.0, i1: Int = 0, i2: Int = 0) {
         self.piece = piece
         self.val = val
-        self.x1 = x1
-        self.y1 = y1
-        self.x2 = x2
-        self.y2 = y2
+        self.i1 = i1
+        self.i2 = i2
     }
 
     var description: String {
         if let piece = self.piece {
             if val == 0.0 {
-                return "\(piece) \(posRepr(x1, y1)) \(posRepr(x2, y2))"
+                return "\(piece) \(posRepr(i1)) \(posRepr(i2))"
             } else {
                 let formatter = NumberFormatter()
                 formatter.numberStyle = .decimal
                 formatter.maximumFractionDigits = 2
                 formatter.groupingSeparator = ""
                 let formattedVal = formatter.string(from: val as NSNumber)
-                return "\(piece) \(posRepr(x1, y1)) \(posRepr(x2, y2)) \(formattedVal ?? "")"
+                return "\(piece) \(posRepr(i1)) \(posRepr(i2)) \(formattedVal ?? "")"
             }
         }
         return "-"
@@ -88,8 +84,7 @@ struct Board: CustomStringConvertible {
     var piece: Piece
     var bestMove: Move
     var bestMoves = [Move](repeating: Move(), count: maxPlies)
-    var x1: Int
-    var y1: Int
+    var i1: Int
     var nPlies: Int
 
     // Piece valuations
@@ -108,7 +103,7 @@ struct Board: CustomStringConvertible {
     static let legalTypes: String = "PBNRQK"
 
     init(isWhite: Bool = false, ply: Int = 0, piece: Piece = Piece(), bestMove: Move = Move(),
-         x1: Int = 0, y1: Int = 0, nPlies: Int = maxPlies) {
+         i1: Int = 0, nPlies: Int = maxPlies) {
         let backRow = "RNBQKBNR"
         for i in 0..<8 {
             let backType = backRow[i]
@@ -121,8 +116,7 @@ struct Board: CustomStringConvertible {
         self.ply = ply
         self.piece = piece
         self.bestMove = bestMove
-        self.x1 = x1
-        self.y1 = y1
+        self.i1 = i1
         self.nPlies = nPlies
     }
 
@@ -201,12 +195,11 @@ struct Board: CustomStringConvertible {
 
         // for each of X's pieces on board
         for y1 in 0..<8 {
-            self.y1 = y1
             for x1 in 0..<8 {
-                self.x1 = x1
+                i1 = y1 * 8 + x1
                 // lift piece from starting position (x1, y1)
-                piece = pos[y1 * 8 + x1]
-                pos[y1 * 8 + x1].type = "."
+                piece = pos[i1]
+                pos[i1].type = "."
                 if piece.type != "." && piece.isWhite == b.isWhite {
                     // for each possible move of piece, search for best next move
                     let pType = piece.type
@@ -237,6 +230,8 @@ struct Board: CustomStringConvertible {
     // Check all moves from (x1, y1) to relative positions in posList. Updates self.bestMove.
     mutating func checkMoves(_ posList: [(Int, Int)], canCapture: Bool = true, canMove: Bool = true) {
         for (dx, dy) in posList {
+            let x1 = i1 % 8
+            let y1 = i1 / 8
             _ = checkMove(x2: x1 + dx, y2: y1 + dy, canCapture: canCapture, canMove: canMove)
         }
     }
@@ -245,8 +240,8 @@ struct Board: CustomStringConvertible {
     mutating func findBestMoveLinearly() {
         for (dx, dy, maxDist) in Board.legalMoves[piece.type]! {
             // move starts with self.piece at (x1, y1)
-            var x2 = x1
-            var y2 = y1
+            var x2 = i1 % 8
+            var y2 = i1 / 8
             var remainingDist = maxDist
             while remainingDist > 0 {
                 x2 += dx
@@ -267,12 +262,13 @@ struct Board: CustomStringConvertible {
         if x2 < 0 || y2 < 0 || x2 >= 8 || y2 >= 8 {
             return false
         }
-        var move = Move(piece: piece, x1: x1, y1: y1, x2: x2, y2: y2)
+        let i2 = y2 * 8 + x2
+        var move = Move(piece: piece, i1: i1, i2: i2)
         if Board.debug {
             let indent = String(repeating: ".", count: ply)
             print("\(indent)\(move.description)")
         }
-        let piece2 = pos[y2 * 8 + x2]
+        let piece2 = pos[i2]
 
         if piece2.type != "." {
             if canCapture && piece2.isWhite == isWhite {
@@ -294,7 +290,7 @@ struct Board: CustomStringConvertible {
             // make our actual move
             let origHasMoved = piece.hasMoved
             piece.hasMoved = true
-            pos[y2 * 8 + x2] = piece
+            pos[i2] = piece
 
             // make move for other side on board copy
             let board2 = Board(findBestMoveFrom: self)
@@ -304,7 +300,7 @@ struct Board: CustomStringConvertible {
             newBestMoves = board2.bestMoves
 
             // remove our piece from this position
-            pos[y2 * 8 + x2] = piece2
+            pos[i2] = piece2
             piece.hasMoved = origHasMoved
         }
 
@@ -331,8 +327,8 @@ struct Board: CustomStringConvertible {
 
     // Actually make move m.
     mutating func move(_ move: Move) {
-        pos[move.y2 * 8 + move.x2] = pos[move.y1 * 8 + move.x1]
-        pos[move.y1 * 8 + move.x1].type = "."
+        pos[move.i2] = pos[move.i1]
+        pos[move.i1].type = "."
     }
 }
 
@@ -361,11 +357,13 @@ func getHumanMove(board: Board, testMode: Bool) -> Move? {
             let x2 = Int(result.3.first!.asciiValue! - Character("a").asciiValue!)
             let y2 = Int(String(result.4))! - 1
 
-            let hPiece = board.pos[y1 * 8 + x1]
+            let i1 = y1 * 8 + x1
+            let i2 = y2 * 8 + x2
+            let hPiece = board.pos[i1]
             if hPiece.type != "." && hPiece.isWhite {
-                return Move(x1: x1, y1: y1, x2: x2, y2: y2)
+                return Move(i1: i1, i2: i2)
             } else {
-                print("Not your piece at \(posRepr(x1, y1))")
+                print("Not your piece at \(posRepr(i1))")
                 continue
             }
         } else {

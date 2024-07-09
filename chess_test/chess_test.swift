@@ -150,7 +150,7 @@ final class ChessTests: XCTestCase {
         1:  R  N  B  Q  K  B  N  R
         """
 
-        let expectedMove = Move(piece: Piece(type: "P", isWhite: false), val: 0.05, x1: 3, y1: 6, x2: 3, y2: 4)
+        let expectedMove = Move(piece: Piece(type: "P", isWhite: false), val: 0.05, i1: 6*8 + 3, i2: 4*8 + 3)
         verifyBestMove(from: before, to: after, expectedMove: expectedMove)
     }
 
@@ -180,7 +180,7 @@ final class ChessTests: XCTestCase {
         1:  -  ·  -  ·  -  ·  N  R
         """
 
-        let expectedMove = Move(piece: Piece(type: "Q", isWhite: false), val: 3.44, x1: 4, y1: 5, x2: 2, y2: 3)
+        let expectedMove = Move(piece: Piece(type: "Q", isWhite: false), val: 3.44, i1: 5*8 + 4, i2: 3*8 + 2)
         verifyBestMove(from: before, to: after, expectedMove: expectedMove)
     }
 
