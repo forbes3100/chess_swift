@@ -16,11 +16,6 @@ enum ChessError: Error {
     case parse(String)
 }
 
-enum Side: Int {
-    case black = 0
-    case white = 1
-}
-
 // Get String representation of a board position.
 func posRepr(_ x: Int, _ y: Int) -> String {
     return "\("abcdefgh"[x])\(y + 1)"
@@ -29,17 +24,17 @@ func posRepr(_ x: Int, _ y: Int) -> String {
 // A chess piece.
 struct Piece: CustomStringConvertible {
     var type: Character
-    var side: Side
+    var isWhite: Bool
     var hasMoved: Bool
 
-    init(type: Character = ".", side: Side = .black) {
+    init(type: Character = ".", isWhite: Bool = false) {
         self.type = type
-        self.side = side
+        self.isWhite = isWhite
         hasMoved = false
     }
 
     var description: String {
-        if side == .white {
+        if isWhite {
             return " \(type) "
         } else {
             return "{\(type)}"
@@ -88,7 +83,7 @@ struct Board: CustomStringConvertible {
     static let maxPlies = 4
 
     var pos = [Piece](repeating: Piece(), count: 64)
-    var side: Side
+    var isWhite: Bool
     var ply: Int
     var piece: Piece
     var bestMove: Move
@@ -112,17 +107,17 @@ struct Board: CustomStringConvertible {
 
     static let legalTypes: String = "PBNRQK"
 
-    init(side: Side = .black, ply: Int = 0, piece: Piece = Piece(), bestMove: Move = Move(),
+    init(isWhite: Bool = false, ply: Int = 0, piece: Piece = Piece(), bestMove: Move = Move(),
          x1: Int = 0, y1: Int = 0, nPlies: Int = maxPlies) {
         let backRow = "RNBQKBNR"
         for i in 0..<8 {
             let backType = backRow[i]
-            pos[i] = Piece(type: backType, side: .white)
-            pos[8 + i] = Piece(type: "P", side: .white)
-            pos[6*8 + i] = Piece(type: "P", side: .black)
-            pos[7*8 + i] = Piece(type: backType, side: .black)
+            pos[i] = Piece(type: backType, isWhite: true)
+            pos[8 + i] = Piece(type: "P", isWhite: true)
+            pos[6*8 + i] = Piece(type: "P", isWhite: false)
+            pos[7*8 + i] = Piece(type: backType, isWhite: false)
         }
-        self.side = side
+        self.isWhite = isWhite
         self.ply = ply
         self.piece = piece
         self.bestMove = bestMove
@@ -169,14 +164,14 @@ struct Board: CustomStringConvertible {
                     if s == "." || s == "·" || s == "-" {
                         pos[y * 8 + x].type = "."
                     } else {
-                        let side: Side = s[0] == "{" ? .black : .white
-                        let type = side == .black ? s[1] : s[0]
+                        let isWhite = s[0] != "{"
+                        let type = isWhite ? s[0] : s[1]
                         if !Board.legalTypes.contains(type) {
                             throw ChessError.parse("bad piece '\(type)'")
                         }
-                        var piece = Piece(type: type, side: side)
+                        var piece = Piece(type: type, isWhite: isWhite)
                         if type == "P" {
-                            if (side == .black && y != 6) || (side == .white && y != 1) {
+                            if (!isWhite && y != 6) || (isWhite && y != 1) {
                                 piece.hasMoved = true
                             }
                         }
@@ -201,7 +196,7 @@ struct Board: CustomStringConvertible {
 
         // set up search for our turn
         ply = b.ply + 1
-        side = Side(rawValue: 1 - b.side.rawValue)!
+        isWhite = !isWhite
         bestMove = Move(val: -9999)
 
         // for each of X's pieces on board
@@ -212,12 +207,12 @@ struct Board: CustomStringConvertible {
                 // lift piece from starting position (x1, y1)
                 piece = pos[y1 * 8 + x1]
                 pos[y1 * 8 + x1].type = "."
-                if piece.type != "." && piece.side == b.side {
+                if piece.type != "." && piece.isWhite == b.isWhite {
                     // for each possible move of piece, search for best next move
                     let pType = piece.type
 
                     if pType == "P" {  // pawn
-                        let adv = piece.side == .white ? 1 : -1
+                        let adv = piece.isWhite ? 1 : -1
                         if checkMove(x2: x1, y2: y1 + adv) && !piece.hasMoved {
                             _ = checkMove(x2: x1, y2: y1 + 2*adv)
                         }
@@ -280,7 +275,7 @@ struct Board: CustomStringConvertible {
         let piece2 = pos[y2 * 8 + x2]
 
         if piece2.type != "." {
-            if canCapture && piece2.side == side {
+            if canCapture && piece2.isWhite == isWhite {
                 // if move is a capture: move value = piece value
                 move.val = Double(Board.valuation[piece2.type]!)
             } else {
@@ -367,7 +362,7 @@ func getHumanMove(board: Board, testMode: Bool) -> Move? {
             let y2 = Int(String(result.4))! - 1
 
             let hPiece = board.pos[y1 * 8 + x1]
-            if hPiece.type != "." && hPiece.side == .white {
+            if hPiece.type != "." && hPiece.isWhite {
                 return Move(x1: x1, y1: y1, x2: x2, y2: y2)
             } else {
                 print("Not your piece at \(posRepr(x1, y1))")
