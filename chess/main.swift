@@ -152,11 +152,11 @@ struct Board: CustomStringConvertible {
                 if matches.count != 8 {
                     throw ChessError.parse("row \(y + 1): wrong number of columns \(matches.count)")
                 }
-                var x = 0
+                var i = y * 8
                 for match in matches {
                     let s = String(match.output.0)
                     if s == "." || s == "·" || s == "-" {
-                        pos[y * 8 + x].type = "."
+                        pos[i].type = "."
                     } else {
                         let isWhite = s[0] != "{"
                         let type = isWhite ? s[0] : s[1]
@@ -169,9 +169,9 @@ struct Board: CustomStringConvertible {
                                 piece.hasMoved = true
                             }
                         }
-                        pos[y * 8 + x] = piece
+                        pos[i] = piece
                     }
-                    x += 1
+                    i += 1
                 }
             }
         }
@@ -222,7 +222,7 @@ struct Board: CustomStringConvertible {
                     }
                 }
                 // restore original position of our piece
-                pos[y1 * 8 + x1] = piece
+                pos[i1] = piece
             }
         }
     }
