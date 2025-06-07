@@ -3,6 +3,18 @@ Minimal chess, in Swift
 
 This is a bare-bones computer-chess player for the terminal, in about 500 lines of code. It doesn't know castling, promotion, or en passant, or do any sort of optimization.
 
+Build with Swift Package Manager:
+
+```bash
+$ swift run chess_cli
+```
+
+Run the tests with:
+
+```bash
+$ swift test
+```
+
 ```
     a  b  c  d  e  f  g  h
 8: {R}{N} ·  -  ·  - {N}{R}
