@@ -204,4 +204,21 @@ final class ChessTests: XCTestCase {
 
         CommandLine.arguments = originalArguments
     }
+
+    func testLoadPosFile() {
+        var board = Board()
+        var seenError = ""
+        var filename = "bad_row.txt"
+        do {
+            try board.loadPos(fromFile: filename)
+        } catch ChessError.parse(let message) {
+            print("Error loading file \(filename): \(message)")
+            seenError = message
+        } catch {
+            print("Error loading file \(filename)")
+            seenError = "error"
+        }
+        XCTAssertEqual(seenError, "Error loading file bad_row.txt: row 9 out of range",
+                       "didn't catch row error while loading board file")
+    }
 }

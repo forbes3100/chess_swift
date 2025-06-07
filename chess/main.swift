@@ -57,19 +57,12 @@ struct Move: CustomStringConvertible {
     }
 
     var description: String {
-        if let piece = self.piece {
-            if val == 0.0 {
-                return "\(piece) \(posRepr(i1)) \(posRepr(i2))"
-            } else {
-                let formatter = NumberFormatter()
-                formatter.numberStyle = .decimal
-                formatter.maximumFractionDigits = 2
-                formatter.groupingSeparator = ""
-                let formattedVal = formatter.string(from: val as NSNumber)
-                return "\(piece) \(posRepr(i1)) \(posRepr(i2)) \(formattedVal ?? "")"
-            }
-        }
-        return "-"
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.maximumFractionDigits = 2
+        formatter.groupingSeparator = ""
+        let formattedVal = formatter.string(from: val as NSNumber)
+        return "\(piece!) \(posRepr(i1)) \(posRepr(i2)) \(formattedVal!)"
     }
 }
 
@@ -178,9 +171,8 @@ struct Board: CustomStringConvertible {
     }
 
     public mutating func loadPos(fromFile filename: String) throws {
-        if let fileContent = try? String(contentsOfFile: filename) {
-            try loadPos(fromDescription: fileContent)
-        }
+        let fileContent = try String(contentsOfFile: filename)
+        try loadPos(fromDescription: fileContent)
     }
 
     // Create a copy of board b at next ply, then find the best move for it, setting .bestMove.
@@ -410,7 +402,7 @@ func main() {
         board.move(board2.bestMove)
 
         // list move predictions
-        print("best move: ", terminator: "")
+        print("\nbest move: ", terminator: "")
         for move in board2.bestMoves.dropFirst() {
             print(move.description, terminator: "; ")
         }

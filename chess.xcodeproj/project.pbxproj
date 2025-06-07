@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D25F92242C3DE68100F753C3 /* mate_in_2.txt in Resources */ = {isa = PBXBuildFile; fileRef = D25F92232C3DE68100F753C3 /* mate_in_2.txt */; };
+		D25F92272C3DE77E00F753C3 /* bad_column.txt in Resources */ = {isa = PBXBuildFile; fileRef = D25F92252C3DE77E00F753C3 /* bad_column.txt */; };
+		D25F92282C3DE77E00F753C3 /* bad_row.txt in Resources */ = {isa = PBXBuildFile; fileRef = D25F92262C3DE77E00F753C3 /* bad_row.txt */; };
 		D28569462C360173001EFF24 /* chess_test.swift in Sources */ = {isa = PBXBuildFile; fileRef = D28569452C360173001EFF24 /* chess_test.swift */; };
 		D285694A2C36051F001EFF24 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2F247352C31F97200DC010B /* main.swift */; };
 		D2F247362C31F97200DC010B /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2F247352C31F97200DC010B /* main.swift */; };
@@ -25,6 +28,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		D25F92232C3DE68100F753C3 /* mate_in_2.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = mate_in_2.txt; sourceTree = "<group>"; };
+		D25F92252C3DE77E00F753C3 /* bad_column.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = bad_column.txt; sourceTree = "<group>"; };
+		D25F92262C3DE77E00F753C3 /* bad_row.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = bad_row.txt; sourceTree = "<group>"; };
 		D28569432C360173001EFF24 /* chess_test.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = chess_test.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D28569452C360173001EFF24 /* chess_test.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = chess_test.swift; sourceTree = "<group>"; };
 		D2F247322C31F97200DC010B /* chess */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = chess; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -53,6 +59,9 @@
 			isa = PBXGroup;
 			children = (
 				D28569452C360173001EFF24 /* chess_test.swift */,
+				D25F92232C3DE68100F753C3 /* mate_in_2.txt */,
+				D25F92252C3DE77E00F753C3 /* bad_column.txt */,
+				D25F92262C3DE77E00F753C3 /* bad_row.txt */,
 			);
 			path = chess_test;
 			sourceTree = "<group>";
@@ -162,6 +171,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D25F92272C3DE77E00F753C3 /* bad_column.txt in Resources */,
+				D25F92242C3DE68100F753C3 /* mate_in_2.txt in Resources */,
+				D25F92282C3DE77E00F753C3 /* bad_row.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
