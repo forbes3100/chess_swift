@@ -201,11 +201,21 @@ final class ChessTests: XCTestCase {
     }
 
     func testLoadPosFile() {
+        // 1) Grab the bundle in which this test class lives
+        let testBundle = Bundle(for: ChessTests.self)
+
+        // 2) Find the URL of bad_row.txt
+        guard let url = testBundle.url(forResource: "bad_row", withExtension: "txt") else {
+            XCTFail("couldn’t find bad_row.txt in test bundle")
+            return
+        }
+
+        // 3) Call loadPos using the absolute path
         var board = Board()
         var seenError = ""
-        var filename = "bad_row.txt"
+        let filename = "bad_row.txt"
         do {
-            try board.loadPos(fromFile: filename)
+            try board.loadPos(fromFile: url.path)
         } catch ChessError.parse(let message) {
             print("Error loading file \(filename): \(message)")
             seenError = message
