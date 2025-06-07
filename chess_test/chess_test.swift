@@ -185,11 +185,8 @@ final class ChessTests: XCTestCase {
     }
 
     func testMainWithArguments() {
-        let originalArguments = CommandLine.arguments
-
-        CommandLine.arguments = ["chess", "-t"]
         let output = captureStandardOutput {
-            main()
+            chessMain(arguments: ["chess", "-t"])
         }
         print(output)
 
@@ -201,8 +198,6 @@ final class ChessTests: XCTestCase {
                       "Output should contain diagram of computer's move.")
         XCTAssertTrue(output.contains("4:  P  -  ·  -  ·  -  ·  - "),
                       "Output should contain diagram of human's move.")
-
-        CommandLine.arguments = originalArguments
     }
 
     func testLoadPosFile() {
