@@ -365,16 +365,16 @@ func getHumanMove(board: Board, testMode: Bool) -> Move? {
     return nil
 }
 
-func main() {
+func chessMain(arguments: [String] = CommandLine.arguments) {
     var board = Board()
     var testMode = false
 
     // if given a starting-position-pattern filename, read in that file
-    if CommandLine.arguments.count == 2 {
-        if CommandLine.arguments[1] == "-t" {
+    if arguments.count == 2 {
+        if arguments[1] == "-t" {
             testMode = true
         } else {
-            let filename = CommandLine.arguments[1]
+            let filename = arguments[1]
             do {
                 try board.loadPos(fromFile: filename)
             } catch ChessError.parse(let message) {
@@ -421,6 +421,10 @@ func main() {
             break
         }
     }
+}
+
+func main() {
+    chessMain(arguments: CommandLine.arguments)
 }
 
 main()
