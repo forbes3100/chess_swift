@@ -135,11 +135,12 @@ struct Board: CustomStringConvertible {
     public mutating func loadPos(fromDescription description: String) throws {
         let lines = description.split(separator: "\n")
         for line in lines {
-            if let match = try? /\ *([1-8]):(.*)/.firstMatch(in: line) {
-                let y = Int(match.output.1)! - 1
-                if y < 0 || y > 7 {
-                    throw ChessError.parse("row \(match.output.1) out of range")
+            if let match = try? /\s*(\d+):(.*)/.firstMatch(in: line) {
+                let rowStr = String(match.output.1)
+                guard let yNum = Int(rowStr), yNum >= 1, yNum <= 8 else {
+                    throw ChessError.parse("row \(rowStr) out of range")
                 }
+                let y = yNum - 1
                 let pieces = match.output.2
                 let matches = pieces.matches(of: /(\{[A-Z]\}|[A-Z]|[\.·-])/)
                 if matches.count != 8 {
@@ -365,7 +366,7 @@ func getHumanMove(board: Board, testMode: Bool) -> Move? {
     return nil
 }
 
-func chessMain(arguments: [String] = CommandLine.arguments) {
+public func chessMain(arguments: [String] = CommandLine.arguments) {
     var board = Board()
     var testMode = false
 
@@ -423,8 +424,3 @@ func chessMain(arguments: [String] = CommandLine.arguments) {
     }
 }
 
-func main() {
-    chessMain(arguments: CommandLine.arguments)
-}
-
-main()
