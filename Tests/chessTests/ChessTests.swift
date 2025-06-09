@@ -201,27 +201,24 @@ final class ChessTests: XCTestCase {
     }
 
     func testLoadPosFile() {
-        // 1) Grab the bundle in which this test class lives
-        let testBundle = Bundle(for: ChessTests.self)
-
-        // 2) Find the URL of bad_row.txt
-        guard let url = testBundle.url(forResource: "bad_row", withExtension: "txt") else {
+        // Find the URL of bad_row.txt in the test resources
+        guard let url = Bundle.module.url(forResource: "bad_row", withExtension: "txt") else {
             XCTFail("couldn’t find bad_row.txt in test bundle")
             return
         }
 
-        // 3) Call loadPos using the absolute path
+        // Call loadPos using the absolute path
         var board = Board()
         var seenError = ""
         let filename = "bad_row.txt"
         do {
             try board.loadPos(fromFile: url.path)
         } catch ChessError.parse(let message) {
-            print("Error loading file \(filename): \(message)")
-            seenError = message
+            seenError = "Error loading file \(filename): \(message)"
+            print(seenError)
         } catch {
-            print("Error loading file \(filename)")
-            seenError = "error"
+            seenError = "Error loading file \(filename)"
+            print(seenError)
         }
         XCTAssertEqual(seenError, "Error loading file bad_row.txt: row 9 out of range",
                        "didn't catch row error while loading board file")
