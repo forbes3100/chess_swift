@@ -172,7 +172,9 @@ struct Board: CustomStringConvertible {
     }
 
     public mutating func loadPos(fromFile filename: String) throws {
-        let fileContent = try String(contentsOfFile: filename)
+        // 'init(contentsOfFile:)' was deprecated in macOS 15 in favor of the
+        // encoding-aware initializer.
+        let fileContent = try String(contentsOfFile: filename, encoding: .utf8)
         try loadPos(fromDescription: fileContent)
     }
 
