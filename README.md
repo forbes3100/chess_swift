@@ -9,8 +9,6 @@ Build with Swift Package Manager:
 $ swift run chess_cli
 ```
 
-Requires macOS 13 or newer due to usage of modern Regex features.
-
 Run the tests with:
 
 ```bash

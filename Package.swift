@@ -4,7 +4,7 @@ import PackageDescription
 let package = Package(
     name: "chess_swift",
     platforms: [
-        .macOS(.v13)
+        .macOS(.v12)
     ],
     products: [
         .library(name: "chess", targets: ["chess"]),
