@@ -1,2 +1,2 @@
 commands:
- - swift test --parallel -Xswiftc -enable-bare-slash-regex
+ - swift test -Xswiftc -enable-bare-slash-regex
