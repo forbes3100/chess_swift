@@ -223,4 +223,53 @@ final class ChessTests: XCTestCase {
         XCTAssertEqual(seenError, "Error loading file bad_row.txt: row 9 out of range",
                        "didn't catch row error while loading board file")
     }
+
+    func testLoadPosFileBadColumn() {
+        guard let url = Bundle.module.url(forResource: "bad_column", withExtension: "txt") else {
+            XCTFail("couldn't find bad_column.txt in test bundle")
+            return
+        }
+        var board = Board()
+        var seenError = ""
+        let filename = "bad_column.txt"
+        do {
+            try board.loadPos(fromFile: url.path)
+        } catch ChessError.parse(let message) {
+            seenError = "Error loading file \(filename): \(message)"
+        } catch {
+            seenError = "Error loading file \(filename)"
+        }
+        XCTAssertEqual(seenError, "Error loading file bad_column.txt: row 7: wrong number of columns 7",
+                       "didn't catch column error while loading board file")
+    }
+
+    func testLoadPosBadPiece() {
+        var board = Board()
+        let description = """
+            a  b  c  d  e  f  g  h
+        8: {R}{N}{B}{Q}{K}{B}{N}{R}
+        7: {P}{P}{P}{P}{P}{P}{P}{P}
+        6:  ·  -  ·  -  ·  -  ·  -
+        5:  -  ·  -  ·  -  ·  -  ·
+        4:  ·  -  ·  -  X  -  ·  -
+        3:  -  ·  -  ·  -  ·  -  ·
+        2:  P  P  P  P  P  P  P  P
+        1:  R  N  B  Q  K  B  N  R
+        """
+        do {
+            try board.loadPos(fromDescription: description)
+            XCTFail("expected bad piece error")
+        } catch ChessError.parse(let message) {
+            XCTAssertEqual(message, "bad piece 'X'")
+        } catch {
+            XCTFail("Unexpected error")
+        }
+    }
+
+    func testPosRepr() {
+        XCTAssertEqual(posRepr(0), "a1")
+        XCTAssertEqual(posRepr(7), "h1")
+        XCTAssertEqual(posRepr(56), "a8")
+        XCTAssertEqual(posRepr(63), "h8")
+    }
 }
